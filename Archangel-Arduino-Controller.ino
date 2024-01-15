@@ -1,28 +1,36 @@
-//#include <Servo.h>
-
-//Servo myservo;
-
-
-
 void setup(){
    
   // Set the baud rate  
   Serial.begin(115200);
-  //myservo.attach(9)
+  pinMode(LED_BUILTIN, OUTPUT);
    
 }
 
-unsigned char servo_state = 0;
- 
+unsigned int blink_delay = 100;
+
 void loop(){
  
   if(Serial.available() > 0) {
-    String data = Serial.readStringUntil('\n');
-    servo_state = (unsigned char)data[0];
-    Serial.print("Setting servo state to: ");
-    Serial.println(String(servo_state));
+    //faster reimplementation of Serial.readStringUntil
+    char buffer[Serial.available() + 1];
+
+    int index = 0;
+    while(Serial.available() > 0){
+      if (Serial.peek() == "\n")
+        break;
+
+      buffer[index] = Serial.read();
+      index += 1;
+    }
+    buffer[index] = "\0";
+
+    //don't forget to set the delay;
+    blink_delay = atoi(buffer);
   }
 
-  //myservo.write(servo_state);
-  //delay(20);
+  delay(blink_delay);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(blink_delay);
+  digitalWrite(LED_BUILTIN, LOW);
+
 }
